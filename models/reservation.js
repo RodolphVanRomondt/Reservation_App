@@ -6,7 +6,6 @@ const db = require("../db");
 
 
 /** A reservation for a party */
-
 class Reservation {
   constructor({id, customerId, numGuests, startAt, notes}) {
     this.id = id;
@@ -17,13 +16,11 @@ class Reservation {
   }
 
   /** formatter for startAt */
-
   getformattedStartAt() {
     return moment(this.startAt).format('MMMM Do YYYY, h:mm a');
   }
 
   /** given a customer id, find their reservations. */
-
   static async getReservationsForCustomer(customerId) {
     const results = await db.query(
           `SELECT id, 
@@ -38,7 +35,21 @@ class Reservation {
 
     return results.rows.map(row => new Reservation(row));
   }
+
+  /* Save a reveration */
+  async save() {
+
+    if (!this.id) {
+      const result = await db.query(`
+      INSERT INTO reservations (customer_id, start_at, num_guests, notes)
+      VALUES($1, $2, $3, $4)
+      RETURNING id`,
+        [this.customerId, this.startAt, this.numGuests, this.notes]);
+      
+      this.id = result.rows[0];
+    }
+  }
 }
 
-
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
 module.exports = Reservation;
