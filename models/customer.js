@@ -50,6 +50,39 @@ class Customer {
     return new Customer(customer);
   }
 
+  /* Get a customer by Name. */
+  static async getByName(s) {
+
+    const idx = s.indexOf(" ");
+    const first = s.substring(0, idx);
+    const last = s.substring(idx+1, 1000);
+
+    const result1 = await db.query(
+      `SELECT id,
+         first_name AS "firstName",
+         last_name AS "lastName",
+         phone,
+         notes
+         FROM customers WHERE first_name ILIKE $1`, [first]
+    );
+    const result2 = await db.query(
+      `SELECT id,
+         first_name AS "firstName",
+         last_name AS "lastName",
+         phone,
+         notes
+         FROM customers WHERE last_name ILIKE $1`, [last]
+    );
+
+    if (result1.rows.length === 0 || result2.rows.length === 0) {
+      const err = new Error(`No such customer: ${s}`);
+      err.status = 404;
+      throw err;
+    }
+
+    return new Customer(result1.rows[0]);
+  }
+
   /* Get a customer's FullName */
   fullName() {
     return `${this.firstName} ${this.lastName}`;

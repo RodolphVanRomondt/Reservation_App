@@ -26,6 +26,25 @@ router.get("/add/", async function(req, res, next) {
   }
 });
 
+/* Search for a customer by name. */
+router.get("/search", async function (req, res, next) {
+
+  try {
+
+    if (!req.query.s) {
+      const e = new Error("No Input - Bad Request.", 400);
+      e.status = 400;
+      throw e;
+    }
+
+    const customer = await Customer.getByName(req.query.s);
+
+    return res.redirect(`/${customer.id}`);
+  } catch (e) {
+    return next(e);
+  }
+});
+
 /** Handle adding a new customer. */
 router.post("/add/", async function(req, res, next) {
   try {
